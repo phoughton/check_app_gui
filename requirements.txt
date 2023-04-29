@@ -1,0 +1,3 @@
+azure-ai-vision
+python-decouple
+
