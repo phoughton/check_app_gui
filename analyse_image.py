@@ -3,7 +3,6 @@ import azure.ai.vision as sdk
 import cv2
 
 
-
 service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
                                            config("VISION_KEY"))
 
@@ -56,25 +55,28 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
                 print("     Word: '{}', Bounding polygon {}, Confidence {:.4f}"
                       .format(word.content, points_string, word.confidence))
 
-    result_details = sdk.ImageAnalysisResultDetails.from_result(result)
-    print(" Result details:")
-    print("   Image ID: {}".format(result_details.image_id))
-    print("   Result ID: {}".format(result_details.result_id))
-    print("   Connection URL: {}".format(result_details.connection_url))
-    print("   JSON result: {}".format(result_details.json_result))
+    
+    
+    
+    image_to_draw = cv2.imread("images/LondonBombedWWII_full.jpg")
 
     # Loop through objects 
     for an_object in result.objects:
+        print(an_object.name)
+
         # Assign bounding box dimensions to objects representing x an y positions as well as width and height
-        x = an_object.rectangle.x
-        y = an_object.rectangle.y
-        w = an_object.rectangle.w
-        h = an_object.rectangle.h
+        x = an_object.bounding_box.x
+        y = an_object.bounding_box.y
+        w = an_object.bounding_box.w
+        h = an_object.bounding_box.h
+        print(x, y, w, h)
+
         # Draw a rectangle around the object
-        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # create image object form file
 
-
-    
+        cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # save the image to file
+    cv2.imwrite("images/LondonBombedWWII_full_labelled.jpg", image_to_draw)
 
 
 elif result.reason == sdk.ImageAnalysisResultReason.ERROR:

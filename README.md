@@ -2,6 +2,18 @@
 
 ## installation instructions
 
+
+
+System setup:
+
+```bash
+sudo apt update
+sudo apt install libgl1-mesa-glx
+```
+
+
+Then:
+
 1. Create a virtual environment
     ```bash
     python3 -m venv .venv
