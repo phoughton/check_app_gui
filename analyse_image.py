@@ -1,11 +1,16 @@
 from decouple import config
 import azure.ai.vision as sdk
+import cv2
+
+
 
 service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
                                            config("VISION_KEY"))
 
 vision_source = sdk.VisionSource(
-    url="https://cdn.britannica.com/23/194523-050-E6C02DBE/selection-American-playing-cards-jack-queen-ace.jpg")
+    filename="images/LondonBombedWWII_full.jpg")
+
+# url="https://cdn.britannica.com/23/194523-050-E6C02DBE/selection-American-playing-cards-jack-queen-ace.jpg")
 # https://media.istockphoto.com/id/160042754/photo/royal-flush.jpg?s=612x612&w=0&k=20&c=vBD-6SsV6vubTRPuJTbea8TGElJssc0lHI0MOHA9scU=")
 # https://i.guim.co.uk/img/media/d0d65e8cc17a815fe1fd955ae20ff47c40c58988/0_0_3000_2000/master/3000.jpg?width=620&quality=85&dpr=1&s=none")
 # https://ichef.bbci.co.uk/news/976/cpsprodpb/1B21/production/_129254960_microsoftteams-image.png")
@@ -57,6 +62,19 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
     print("   Result ID: {}".format(result_details.result_id))
     print("   Connection URL: {}".format(result_details.connection_url))
     print("   JSON result: {}".format(result_details.json_result))
+
+    # Loop through objects 
+    for an_object in result.objects:
+        # Assign bounding box dimensions to objects representing x an y positions as well as width and height
+        x = an_object.rectangle.x
+        y = an_object.rectangle.y
+        w = an_object.rectangle.w
+        h = an_object.rectangle.h
+        # Draw a rectangle around the object
+        cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 3)
+
+
+    
 
 
 elif result.reason == sdk.ImageAnalysisResultReason.ERROR:
