@@ -6,8 +6,21 @@ import cv2
 service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
                                            config("VISION_KEY"))
 
+# Image base folder location
+image_folder = "images/"
+
+output_folder = "output/"
+
+# The image to use for analysis
+source_image_filename = "clouds_tree_IMG_20230501_174828_772.jpg"
+
+source_image = image_folder + source_image_filename
+
+destination_image = output_folder + source_image_filename
+
+
 vision_source = sdk.VisionSource(
-    filename="images/LondonBombedWWII_full.jpg")
+    filename=source_image)
 
 # url="https://cdn.britannica.com/23/194523-050-E6C02DBE/selection-American-playing-cards-jack-queen-ace.jpg")
 # https://media.istockphoto.com/id/160042754/photo/royal-flush.jpg?s=612x612&w=0&k=20&c=vBD-6SsV6vubTRPuJTbea8TGElJssc0lHI0MOHA9scU=")
@@ -55,16 +68,20 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
                 print("     Word: '{}', Bounding polygon {}, Confidence {:.4f}"
                       .format(word.content, points_string, word.confidence))
 
-    
-    
-    
-    image_to_draw = cv2.imread("images/LondonBombedWWII_full.jpg")
+    image_to_draw = cv2.imread(source_image)
+
+    image_width = image_to_draw.shape[1]
+    image_height = image_to_draw.shape[0]
+
+    print(f"Image width: {image_width}, height: {image_height}")
+
 
     # Loop through objects 
     for an_object in result.objects:
         print(an_object.name)
 
-        # Assign bounding box dimensions to objects representing x an y positions as well as width and height
+        # Assign bounding box dimensions to objects representing 
+        # x an y positions as well as width and height
         x = an_object.bounding_box.x
         y = an_object.bounding_box.y
         w = an_object.bounding_box.w
@@ -75,8 +92,11 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
         # create image object form file
 
         cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # write a text label on the image using cv2
+        cv2.putText(image_to_draw, an_object.name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+
         # save the image to file
-    cv2.imwrite("images/LondonBombedWWII_full_labelled.jpg", image_to_draw)
+    cv2.imwrite(destination_image, image_to_draw)
 
 
 elif result.reason == sdk.ImageAnalysisResultReason.ERROR:
