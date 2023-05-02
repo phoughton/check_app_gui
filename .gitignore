@@ -159,6 +159,16 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-# labelled images in the images folder
+#  images in the images folder
 images/*_labelled.*
-images/*_labeled.*
+output/*.jpg
+output/*.png
+output/*.jpeg
+output/*.gif
+output/*.mp4
+output/*.avi
+output/*.mkv
+output/*.webm
+output/*.mov
+output/*.m4v
+output/*.wmv

@@ -7,16 +7,16 @@ service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
                                            config("VISION_KEY"))
 
 # Image base folder location
-image_folder = "images/"
+IMAGE_FOLDER = "images/"
 
-output_folder = "output/"
+OUTPUT_FOLDER = "output/"
 
 # The image to use for analysis
-source_image_filename = "clouds_tree_IMG_20230501_174828_772.jpg"
+source_image_filename = "LondonBombedWWII_full.jpg"
 
-source_image = image_folder + source_image_filename
+source_image = IMAGE_FOLDER + source_image_filename
 
-destination_image = output_folder + source_image_filename
+destination_image = OUTPUT_FOLDER + source_image_filename
 
 
 vision_source = sdk.VisionSource(
@@ -73,6 +73,8 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
     image_width = image_to_draw.shape[1]
     image_height = image_to_draw.shape[0]
 
+    label_text_scale = 0.001 * image_height
+
     print(f"Image width: {image_width}, height: {image_height}")
 
 
@@ -93,7 +95,7 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
 
         cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
         # write a text label on the image using cv2
-        cv2.putText(image_to_draw, an_object.name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 255, 0), 2)
+        cv2.putText(image_to_draw, an_object.name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, label_text_scale, (0, 255, 0), 2)
 
         # save the image to file
     cv2.imwrite(destination_image, image_to_draw)
