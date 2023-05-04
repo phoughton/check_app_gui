@@ -3,6 +3,43 @@ import azure.ai.vision as sdk
 import cv2
 
 
+# This function will draw a rectangle around the object and label it
+def label_objects(image_source, image_out_filename, objects_in_image):
+
+    image_to_draw = cv2.imread(image_source)
+
+    image_width = image_to_draw.shape[1]
+    image_height = image_to_draw.shape[0]
+
+    label_text_scale = 0.001 * image_height
+
+    print(f"Image width: {image_width}, height: {image_height}")
+
+    # Loop through objects 
+    for one_object in objects_in_image:
+        print(one_object.name)
+
+        # Assign bounding box dimensions to objects representing 
+        # x an y positions as well as width and height
+        x = one_object.bounding_box.x
+        y = one_object.bounding_box.y
+        w = one_object.bounding_box.w
+        h = one_object.bounding_box.h
+        print(x, y, w, h)
+
+        # Draw a rectangle around the object
+        # create image object form file
+
+        cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
+        # write a text label on the image using cv2
+        cv2.putText(image_to_draw, one_object.name, (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, label_text_scale, (0, 255, 0), 2)
+
+        # save the image to file
+        print(f"Saving image to {image_out_filename}")
+    cv2.imwrite(image_out_filename, image_to_draw)
+
+
 service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
                                            config("VISION_KEY"))
 
@@ -15,8 +52,6 @@ OUTPUT_FOLDER = "output/"
 source_image_filename = "LondonBombedWWII_full.jpg"
 
 source_image = IMAGE_FOLDER + source_image_filename
-
-destination_image = OUTPUT_FOLDER + source_image_filename
 
 
 vision_source = sdk.VisionSource(
@@ -68,38 +103,9 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
                 print("     Word: '{}', Bounding polygon {}, Confidence {:.4f}"
                       .format(word.content, points_string, word.confidence))
 
-    image_to_draw = cv2.imread(source_image)
-
-    image_width = image_to_draw.shape[1]
-    image_height = image_to_draw.shape[0]
-
-    label_text_scale = 0.001 * image_height
-
-    print(f"Image width: {image_width}, height: {image_height}")
-
-
-    # Loop through objects 
-    for an_object in result.objects:
-        print(an_object.name)
-
-        # Assign bounding box dimensions to objects representing 
-        # x an y positions as well as width and height
-        x = an_object.bounding_box.x
-        y = an_object.bounding_box.y
-        w = an_object.bounding_box.w
-        h = an_object.bounding_box.h
-        print(x, y, w, h)
-
-        # Draw a rectangle around the object
-        # create image object form file
-
-        cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
-        # write a text label on the image using cv2
-        cv2.putText(image_to_draw, an_object.name, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, label_text_scale, (0, 255, 0), 2)
-
-        # save the image to file
-    cv2.imwrite(destination_image, image_to_draw)
-
+    # label the objects in the image
+    label_objects(source_image, OUTPUT_FOLDER +
+                  "objects_in_" + source_image_filename, result.objects)
 
 elif result.reason == sdk.ImageAnalysisResultReason.ERROR:
 
