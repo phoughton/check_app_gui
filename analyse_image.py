@@ -1,6 +1,7 @@
 from decouple import config
 import azure.ai.vision as sdk
 import cv2
+import os
 
 
 # This function will draw a rectangle around the object and label it
@@ -27,9 +28,6 @@ def label_objects(image_source, image_out_filename, objects_in_image):
         h = one_object.bounding_box.h
         print(x, y, w, h)
 
-        # Draw a rectangle around the object
-        # create image object form file
-
         cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (0, 255, 0), 3)
         # write a text label on the image using cv2
         cv2.putText(image_to_draw, one_object.name, (x, y - 10),
@@ -48,20 +46,18 @@ IMAGE_FOLDER = "images/"
 
 OUTPUT_FOLDER = "output/"
 
-# The image to use for analysis
-source_image_filename = "LondonBombedWWII_full.jpg"
+# Automatically Print a list of images in the images folder to analyse
+print("Select an image to analyse:")
+for index, filename in enumerate(os.listdir(IMAGE_FOLDER)):
+    print(f"{index} - {filename}")
+
+image_index = int(input("Enter the number of the image to analyse: "))
+source_image_filename = os.listdir(IMAGE_FOLDER)[image_index]
 
 source_image = IMAGE_FOLDER + source_image_filename
 
-
 vision_source = sdk.VisionSource(
     filename=source_image)
-
-# url="https://cdn.britannica.com/23/194523-050-E6C02DBE/selection-American-playing-cards-jack-queen-ace.jpg")
-# https://media.istockphoto.com/id/160042754/photo/royal-flush.jpg?s=612x612&w=0&k=20&c=vBD-6SsV6vubTRPuJTbea8TGElJssc0lHI0MOHA9scU=")
-# https://i.guim.co.uk/img/media/d0d65e8cc17a815fe1fd955ae20ff47c40c58988/0_0_3000_2000/master/3000.jpg?width=620&quality=85&dpr=1&s=none")
-# https://ichef.bbci.co.uk/news/976/cpsprodpb/1B21/production/_129254960_microsoftteams-image.png")
-# https://learn.microsoft.com/azure/cognitive-services/computer-vision/media/quickstarts/presentation.png")
 
 analysis_options = sdk.ImageAnalysisOptions()
 
@@ -96,10 +92,13 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
     if result.text is not None:
         print(" Text:")
         for line in result.text.lines:
-            points_string = "{" + ", ".join([str(int(point)) for point in line.bounding_polygon]) + "}"
-            print("   Line: '{}', Bounding polygon {}".format(line.content, points_string))
+            points_string = "{" + ", ".join([str(int(point))
+                                            for point in line.bounding_polygon]) + "}"
+            print("   Line: '{}', Bounding polygon {}".format(
+                line.content, points_string))
             for word in line.words:
-                points_string = "{" + ", ".join([str(int(point)) for point in word.bounding_polygon]) + "}"
+                points_string = "{" + ", ".join([str(int(point))
+                                                for point in word.bounding_polygon]) + "}"
                 print("     Word: '{}', Bounding polygon {}, Confidence {:.4f}"
                       .format(word.content, points_string, word.confidence))
 

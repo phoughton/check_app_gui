@@ -25,8 +25,10 @@ echo -e "VISION_KEY=<YOUR_KEY>\nVISION_ENDPOINT=<YOUR_ENDPOINT>" > .env
 pip install -r requirements.txt
 ```
 
-4. Run the code with the example files:
+4. Run the code with the example files in the images folder:
 
 ```bash
 python3 analse_image.py
 ```
+
+5.  Look for outputs in the output folder
