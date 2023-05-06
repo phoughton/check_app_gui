@@ -1,7 +1,42 @@
+import os
 from decouple import config
 import azure.ai.vision as sdk
 import cv2
-import os
+
+
+# This function will draw a rectangle around the text and label it
+def label_text(image_source, image_out_filename, text_in_image):
+
+    image_to_draw = cv2.imread(image_source)
+
+    image_width = image_to_draw.shape[1]
+    image_height = image_to_draw.shape[0]
+
+    # label_text_scale = 0.001 * image_height
+
+    print(f"Image width: {image_width}, height: {image_height}")
+
+    # Loop through lines of text 
+    for a_line in text_in_image.lines:
+        print(f"The text Content: {a_line.content}")
+        print(f"The text bounding polygon: {a_line.bounding_polygon}")
+
+        # Assign bounding box dimensions to objects representing 
+        # x an y positions as well as width and height
+        x = int(a_line.bounding_polygon[0])
+        y = int(a_line.bounding_polygon[1])
+        w = int(a_line.bounding_polygon[2]) - int(a_line.bounding_polygon[0])
+        h = int(a_line.bounding_polygon[5]) - int(a_line.bounding_polygon[1])
+        print(x, y, w, h)
+
+        cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (255, 0, 0), 3)
+        # write a text label on the image using cv2
+        # cv2.putText(image_to_draw, a_line.content, (x, y - 10),
+        #             cv2.FONT_HERSHEY_SIMPLEX, label_text_scale, (255, 0, 0), 2)
+
+        # save the image to file
+        print(f"Saving image to {image_out_filename}")
+    cv2.imwrite(image_out_filename, image_to_draw)
 
 
 # This function will draw a rectangle around the object and label it
@@ -49,7 +84,8 @@ OUTPUT_FOLDER = "output/"
 # Automatically Print a list of images in the images folder to analyse
 print("Select an image to analyse:")
 for index, filename in enumerate(os.listdir(IMAGE_FOLDER)):
-    print(f"{index} - {filename}")
+    if filename.endswith(".jpg") or filename.endswith(".png"):
+        print(f"{index} - {filename}")
 
 image_index = int(input("Enter the number of the image to analyse: "))
 source_image_filename = os.listdir(IMAGE_FOLDER)[image_index]
@@ -94,8 +130,7 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
         for line in result.text.lines:
             points_string = "{" + ", ".join([str(int(point))
                                             for point in line.bounding_polygon]) + "}"
-            print("   Line: '{}', Bounding polygon {}".format(
-                line.content, points_string))
+            print(f" Line: '{line.content}', Bounding polygon {points_string}")
             for word in line.words:
                 points_string = "{" + ", ".join([str(int(point))
                                                 for point in word.bounding_polygon]) + "}"
@@ -105,6 +140,10 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
     # label the objects in the image
     label_objects(source_image, OUTPUT_FOLDER +
                   "objects_in_" + source_image_filename, result.objects)
+
+    label_text(source_image, OUTPUT_FOLDER +
+               "text_in_" + source_image_filename, result.text)
+
 
 elif result.reason == sdk.ImageAnalysisResultReason.ERROR:
 
