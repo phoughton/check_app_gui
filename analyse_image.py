@@ -30,12 +30,9 @@ def label_text(image_source, image_out_filename, text_in_image):
         print(x, y, w, h)
 
         cv2.rectangle(image_to_draw, (x, y), (x + w, y + h), (255, 0, 0), 3)
-        # write a text label on the image using cv2
-        # cv2.putText(image_to_draw, a_line.content, (x, y - 10),
-        #             cv2.FONT_HERSHEY_SIMPLEX, label_text_scale, (255, 0, 0), 2)
 
-        # save the image to file
         print(f"Saving image to {image_out_filename}")
+        
     cv2.imwrite(image_out_filename, image_to_draw)
 
 
@@ -73,8 +70,32 @@ def label_objects(image_source, image_out_filename, objects_in_image):
     cv2.imwrite(image_out_filename, image_to_draw)
 
 
-service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
-                                           config("VISION_KEY"))
+# Function actually calls the cognitive services api
+def analyse_image(image_source):
+
+    service_options = sdk.VisionServiceOptions(config("VISION_ENDPOINT"),
+                                               config("VISION_KEY"))
+
+    vision_source = sdk.VisionSource(
+        filename=image_source)
+
+    analysis_options = sdk.ImageAnalysisOptions()
+
+    analysis_options.features = (
+        sdk.ImageAnalysisFeature.CAPTION |
+        sdk.ImageAnalysisFeature.TEXT |
+        sdk.ImageAnalysisFeature.OBJECTS
+    )
+
+    analysis_options.language = "en"
+
+    analysis_options.gender_neutral_caption = True
+
+    image_analyzer = sdk.ImageAnalyzer(
+        service_options, vision_source, analysis_options)
+
+    return image_analyzer.analyze()
+
 
 # Image base folder location
 IMAGE_FOLDER = "images/"
@@ -92,25 +113,7 @@ source_image_filename = os.listdir(IMAGE_FOLDER)[image_index]
 
 source_image = IMAGE_FOLDER + source_image_filename
 
-vision_source = sdk.VisionSource(
-    filename=source_image)
-
-analysis_options = sdk.ImageAnalysisOptions()
-
-analysis_options.features = (
-    sdk.ImageAnalysisFeature.CAPTION |
-    sdk.ImageAnalysisFeature.TEXT |
-    sdk.ImageAnalysisFeature.OBJECTS
-)
-
-analysis_options.language = "en"
-
-analysis_options.gender_neutral_caption = True
-
-image_analyzer = sdk.ImageAnalyzer(
-    service_options, vision_source, analysis_options)
-
-result = image_analyzer.analyze()
+result = analyse_image(source_image)
 
 if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
 
@@ -135,8 +138,7 @@ if result.reason == sdk.ImageAnalysisResultReason.ANALYZED:
                 points_string = "{" + ", ".join([str(int(point))
                                                 for point in word.bounding_polygon]) + "}"
                 print("     Word: '{}', Bounding polygon {}, Confidence {:.4f}"
-                      .format(word.content, points_string, word.confidence))
-
+                    .format(word.content, points_string, word.confidence))
     # label the objects in the image
     label_objects(source_image, OUTPUT_FOLDER +
                   "objects_in_" + source_image_filename, result.objects)
