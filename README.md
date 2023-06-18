@@ -28,7 +28,7 @@ pip install -r requirements.txt
 4. Run the code with the example files in the images folder:
 
 ```bash
-python3 analse_image.py
+python3 analyse_image.py
 ```
 
 5.  Look for outputs in the output folder
